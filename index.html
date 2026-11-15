@@ -1,133 +1,327 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#176b65"><title>Meu Remédio — Lembretes</title>
- <meta name="theme-color" content="#3484da">
-<meta name="apple-mobile-web-app-capable" content="yes">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#176b65">
+<title>Meu Remédio</title>
 <style>
-:root{font-family:system-ui,-apple-system,Arial,sans-serif;color:#18332f;background:#f3f8f6}*{box-sizing:border-box}body{margin:0}header{background:#176b65;color:white;padding:20px 16px}header h1{font-size:1.55rem;margin:0}header p{margin:6px 0 0}main{max-width:700px;margin:auto;padding:16px}nav{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:16px}button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:13px;font-weight:650}nav button{background:#e0eae6;color:#21413b}nav button.active,.primary{background:#176b65;color:#fff}.panel{background:white;padding:18px;border-radius:16px;box-shadow:0 2px 12px #173b2b12;margin-bottom:14px}h2{font-size:1.25rem;margin:0 0 12px}label{display:block;font-weight:650;margin:12px 0 5px}input,select{width:100%;padding:13px;border:1px solid #9cb5ac;border-radius:10px;font:inherit;font-size:1rem}.med-photo{width:84px;height:84px;object-fit:contain;border-radius:10px;border:1px solid #d6e3df;float:right;margin:0 0 8px 10px}.patient{font-weight:700;color:#176b65}.photo-preview{max-width:110px;max-height:110px;display:block;margin-top:8px}input[type=color]{height:50px;padding:4px}button:focus-visible,input:focus-visible{outline:3px solid #e9a823;outline-offset:2px}.primary{width:100%;margin-top:16px}.med{border:1px solid #d6e3df;border-radius:13px;padding:14px;margin-top:12px}.med h3{margin:0 0 6px;font-size:1.15rem}.muted{color:#50645e}.pill{display:inline-block;border-radius:20px;padding:3px 9px;background:#eef3f1}.dot{display:inline-block;width:17px;height:17px;border-radius:50%;vertical-align:middle;border:1px solid #777}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.actions button{flex:1;background:#e6f0ed}.actions .done{background:#176b65;color:#fff}.hidden{display:none}.notice{font-size:.9rem;color:#4e615c;line-height:1.5}#toast{position:fixed;bottom:12px;left:12px;right:12px;background:#173b35;color:white;padding:14px;border-radius:12px;display:none;max-width:650px;margin:auto}footer{text-align:center;color:#60756e;font-size:.82rem;padding:12px}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f2f7f5;color:#193b36}
+header{background:#176b65;color:white;padding:22px;text-align:center}
+h1{margin:0}
+main{max-width:650px;margin:auto;padding:15px}
+nav{display:flex;gap:7px;margin-bottom:15px}
+button{cursor:pointer;border:0;border-radius:9px;padding:13px;font-size:16px}
+nav button{flex:1;background:#dcebe7}
+nav button.active{background:#176b65;color:white}
+section{background:white;border-radius:13px;padding:18px;margin-bottom:15px}
+input,select{width:100%;padding:13px;margin:7px 0 14px;border:1px solid #bbb;border-radius:8px;font-size:17px}
+label{font-weight:bold}
+.primary{background:#176b65;color:white;width:100%}
+.danger{background:#b83d3d;color:white}
+.item{border:1px solid #ddd;padding:13px;border-radius:9px;margin:10px 0}
+.hidden{display:none}
+.big{font-size:22px}
+small{color:#666}
 </style>
 </head>
 <body>
-<header><h1>💊 Meu Remédio</h1><p>Lembretes simples para idosos e familiares</p></header> 
+<header>
+<h1>💊 Meu Remédio</h1>
+<p>Cuidando de quem você ama</p>
+</header>
 <main>
-<div class="panel" id="mode-choice"><h2>Como deseja usar?</h2><button class="primary" onclick="setMode('familiar')">Sou familiar</button><button class="primary" onclick="setMode('idoso')">Meus Medicamentos</button></div><nav id="main-nav" aria-label="Abas"><button id="tab-familiar" class="active" onclick="showTab('familiar')">👪 Familiar</button><button id="tab-idoso" onclick="showTab('idoso')">💊 Meus Medicamentos</button><button id="tab-historico" onclick="showTab('historico')">📋 Histórico</button></nav>
-<section id="familiar"><div class="panel"><h2>Cadastrar medicamento</h2><form id="form"><label for="idosoNome">Nome do idoso</label><input id="idosoNome" required placeholder="Nome do idoso" maxlength="100"><label for="nome">Nome do remédio</label><input id="nome" required placeholder="Ex.: Remédio da pressão" maxlength="100"><label for="hora">Horário</label><input id="hora" type="time" required><label for="cor">Cor do comprimido</label><select id="cor"><option>Branco</option><option>Azul</option><option>Amarelo</option><option>Vermelho</option><option>Verde</option><option>Rosa</option><option>Outra cor</option></select><label for="foto">Foto do medicamento (opcional)</label><input id="foto" type="file" accept="image/*"><img id="preview" class="photo-preview hidden" alt="Prévia da foto do medicamento"><label for="obs">Orientações (opcional)</label><input id="obs" placeholder="Ex.: Após o café" maxlength="200"><button class="primary" type="submit">➕ Salvar medicamento</button></form></div><div class="panel"><h2>Medicamentos cadastrados</h2><div id="lista-familiar"></div></div></section>
-<section id="idoso" class="hidden"><div class="panel"><h2>Meus Medicamentos</h2><p class="muted">Toque em “Tomei” após tomar o medicamento.</p><div id="lista-idoso"></div></div></section>
-<section id="historico" class="hidden"><div class="panel"><h2>Histórico de tomadas</h2><div id="lista-historico"></div><button id="limpar" class="hidden" onclick="clearHistory()">Limpar histórico</button></div></section>
-<div class="panel"><button type="button" onclick="localStorage.removeItem('meu-remedio-modo');location.reload()">Trocar de perfil</button><h2>🔊 Som e voz</h2><p>Ative o som uma vez e teste antes de usar.</p><button class="primary" type="button" onclick="enableAlerts()">Ativar som e voz</button><button class="primary" type="button" onclick="testAlarm()">▶ Testar alarme e voz</button><button class="primary hidden" id="stopAlarm" type="button" onclick="stopAlarm()">Parar alarme de teste</button></div><div class="panel notice"><strong>Sobre os lembretes:</strong> enquanto esta página estiver aberta, ela verifica os horários, toca um alarme repetitivo e fala o nome do medicamento, quando o navegador permite. O navegador pode bloquear o som até você tocar na tela. Para receber alertas com o aplicativo fechado, será necessária uma próxima versão com notificações próprias. <strong>Os dados ficam salvos apenas neste navegador</strong>; ainda não existe sincronização entre celulares. Este protótipo não substitui orientações médicas.</div>
-</main><footer>Protótipo inicial • Meu Remédio</footer><div id="toast" role="status" aria-live="polite"></div>
-<script>
-'use strict';
-const KEY='meu-remedio-medicamentos-v1', HIST='meu-remedio-historico-v1';
-function load(k){try{const x=JSON.parse(localStorage.getItem(k)||'[]');return Array.isArray(x)?x:[]}catch{return []}}
-let meds=load(KEY),historyItems=load(HIST),lastAlert='',photoData='';
-const $=id=>document.getElementById(id);
-function save(){localStorage.setItem(KEY,JSON.stringify(meds));localStorage.setItem(HIST,JSON.stringify(historyItems))}
-function safe(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function setMode(mode){localStorage.setItem('meu-remedio-modo',mode);applyMode(mode)}
-function applyMode(mode){const elderly=mode==='idoso';$('mode-choice').classList.add('hidden');$('main-nav').classList.toggle('hidden',elderly);$('familiar').classList.toggle('hidden',elderly);$('idoso').classList.toggle('hidden',!elderly);$('historico').classList.add('hidden');document.querySelector('header p').textContent=elderly?'Meus Medicamentos':'Área do familiar';if(!elderly)showTab('familiar');render()}
-function showTab(tab){for(const x of ['familiar','idoso','historico']){$(x).classList.toggle('hidden',x!==tab);$('tab-'+x).classList.toggle('active',x===tab)}render()}
-function colorValue(c){return ({Branco:'#fff',Azul:'#3484da',Amarelo:'#f4d44e',Vermelho:'#d74444',Verde:'#4ea36b',Rosa:'#ec9bbb'})[c]||'#b8b8b8'}
-function toast(t){const el=$('toast');el.textContent=t;el.style.display='block';clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>el.style.display='none',5500)}
-$('foto').addEventListener('change',async e=>{
- const file=e.target.files[0];photoData='';$('preview').classList.add('hidden');
- if(!file)return;
- if(!file.type.startsWith('image/')){toast('Escolha uma imagem.');return}
- const img=new Image(),url=URL.createObjectURL(file);
- try{
-  await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;img.src=url});
-  const scale=Math.min(1,480/Math.max(img.width,img.height));
-  const canvas=document.createElement('canvas');canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);
-  canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
-  photoData=canvas.toDataURL('image/jpeg',0.65);
-  $('preview').src=photoData;$('preview').classList.remove('hidden');
- }catch{toast('Não foi possível carregar a foto.')}finally{URL.revokeObjectURL(url)}
-});
-$('form').addEventListener('submit',e=>{
- e.preventDefault();
- const item={id:Date.now().toString(36)+Math.random().toString(36).slice(2),idoso:$('idosoNome').value.trim(),nome:$('nome').value.trim(),hora:$('hora').value,cor:$('cor').value,obs:$('obs').value.trim(),foto:photoData};
- if(!item.idoso||!item.nome||!item.hora)return;
- meds.push(item);
- try{save()}catch{meds.pop();toast('Espaço de armazenamento insuficiente. Tente uma foto menor.');return}
- const patient=item.idoso;e.target.reset();$('idosoNome').value=patient;photoData='';$('preview').classList.add('hidden');render();toast('Medicamento cadastrado!');
-});
-function removeMed(id){if(!confirm('Excluir este medicamento?'))return;meds=meds.filter(m=>m.id!==id);save();render()}
-function taken(id){stopAlarm();const m=meds.find(x=>x.id===id);if(!m)return;historyItems.unshift({idoso:m.idoso||'',nome:m.nome,cor:m.cor,hora:m.hora,quando:new Date().toLocaleString('pt-BR')});save();render();toast('Tomada registrada no histórico!')}
-function clearHistory(){if(!confirm('Apagar todo o histórico?'))return;historyItems=[];save();render()}
-function render(){
- const sorted=[...meds].sort((a,b)=>a.hora.localeCompare(b.hora));
- const photo=m=>m.foto&&/^data:image\/jpeg;base64,/.test(m.foto)?`<img class="med-photo" src="${m.foto}" alt="Foto do medicamento ${safe(m.nome)}">`:'';
- const patient=m=>m.idoso?`<p class="patient">👤 ${safe(m.idoso)}</p>`:'';
- $('lista-familiar').innerHTML=sorted.length?sorted.map(m=>`<div class="med">${photo(m)}${patient(m)}<h3>${safe(m.nome)}</h3><span class="pill">🕒 ${safe(m.hora)}</span> <span class="dot" style="background:${colorValue(m.cor)}"></span> ${safe(m.cor)}<p>${safe(m.obs||'Sem orientações adicionais')}</p><div class="actions"><button data-delete="${safe(m.id)}">Excluir</button></div></div>`).join(''):'Nenhum medicamento cadastrado.';
- $('lista-idoso').innerHTML=sorted.length?sorted.map(m=>`<div class="med">${photo(m)}${patient(m)}<h3>${safe(m.nome)}</h3><p><strong>🕒 ${safe(m.hora)}</strong> · <span class="dot" style="background:${colorValue(m.cor)}"></span> Comprimido ${safe(m.cor.toLowerCase())}</p>${m.obs?`<p>${safe(m.obs)}</p>`:''}<div class="actions"><button class="done" data-taken="${safe(m.id)}">✓ Tomei</button></div></div>`).join(''):'Peça ao familiar para cadastrar os medicamentos.';
- $('lista-historico').innerHTML=historyItems.length?historyItems.map(h=>`<div class="med"><strong>${safe(h.nome)}</strong>${h.idoso?`<p>${safe(h.idoso)}</p>`:''}<p class="muted">Tomado em ${safe(h.quando)} · Horário previsto ${safe(h.hora)}</p></div>`).join(''):'Ainda não há tomadas registradas.';
- $('limpar').classList.toggle('hidden',!historyItems.length)
-}
-document.addEventListener('click',e=>{const d=e.target.closest('[data-delete]'),t=e.target.closest('[data-taken]');if(d)removeMed(d.dataset.delete);if(t)taken(t.dataset.taken)});
-let audioCtx=null, alarmTimer=null, voiceTimer=null, activeAlarmIds=[], audioEnabled=false;
-function enableAlerts(){
- try{
-  const AC=window.AudioContext||window.webkitAudioContext;
-  if(AC){audioCtx=audioCtx||new AC();audioCtx.resume();audioEnabled=true;}
-  if('speechSynthesis' in window){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance('Som e voz ativados');u.lang='pt-BR';u.rate=.88;u.volume=1;speechSynthesis.speak(u);}
-  toast('Som e voz ativados. Toque em Testar alarme e voz.');
- }catch(e){toast('Não foi possível ativar o som neste navegador.');}
-}
-function beep(){
- try{
-  const AC=window.AudioContext||window.webkitAudioContext;
-  if(!AC)return;
-  audioCtx=audioCtx||new AC();
-  if(audioCtx.state==='suspended')audioCtx.resume();
-  const now=audioCtx.currentTime;
-  for(let i=0;i<3;i++){
-   const o=audioCtx.createOscillator(),g=audioCtx.createGain();
-   o.type='square';o.frequency.value=i%2?660:880;
-   g.gain.setValueAtTime(.0001,now+i*.28);
-   g.gain.exponentialRampToValueAtTime(.24,now+i*.28+.025);
-   g.gain.exponentialRampToValueAtTime(.0001,now+i*.28+.22);
-   o.connect(g);g.connect(audioCtx.destination);
-   o.start(now+i*.28);o.stop(now+i*.28+.24);
-  }
- }catch(e){}
-}
-function sayAlarm(){
- if(!('speechSynthesis' in window))return;
- const selected=meds.filter(m=>activeAlarmIds.includes(m.id));
- const msg=selected.length?selected.map(m=>`${m.idoso}, está na hora de tomar ${m.nome}, comprimido ${m.cor.toLowerCase()}.`).join(' '):'Atenção. Está na hora do medicamento.';
- try{
-  speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(msg);
-  u.lang='pt-BR';u.rate=.82;u.volume=1;speechSynthesis.speak(u);
- }catch(e){}
-}
-function stopAlarm(){
- clearInterval(alarmTimer);clearInterval(voiceTimer);
- alarmTimer=null;voiceTimer=null;activeAlarmIds=[];
- if('speechSynthesis' in window)speechSynthesis.cancel();
- $('stopAlarm').classList.add('hidden');
-}
-function startAlarm(ids){
- stopAlarm();activeAlarmIds=ids;
- $('stopAlarm').classList.remove('hidden');
- beep();sayAlarm();
- alarmTimer=setInterval(beep,2500);
- voiceTimer=setInterval(sayAlarm,12000);
- toast('⏰ Hora do remédio! O alarme continua até confirmar Tomei ou parar.');
-}
-function testAlarm(){enableAlerts();startAlarm([]);}
-function checkTime(){
- const d=new Date(),hm=d.toTimeString().slice(0,5),day=d.toLocaleDateString('sv-SE');
- const matching=meds.filter(m=>m.hora===hm);
- if(!matching.length)return;
- const key=day+'-'+hm;
- if(lastAlert===key)return;
- lastAlert=key;startAlarm(matching.map(m=>m.id));
-}
-render();const savedMode=localStorage.getItem('meu-remedio-modo');if(savedMode==='idoso'||savedMode==='familiar')applyMode(savedMode);setInterval(checkTime,15000);
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkTime()});
+<nav>
+<button onclick="aba('familiar')" id="bfamiliar" class="active">👨‍👩‍👧 Familiar</button>
+<button onclick="aba('idoso')" id="bidoso">💊 Idoso</button>
+<button onclick="aba('historico')" id="bhistorico">📋 Histórico</button>
+</nav>
 
+<section>
+<h3>🔗 Conexão familiar</h3>
+<label>Código da família</label>
+<input id="codigo" placeholder="Ex: familia123">
+<button class="primary" onclick="conectar()">Conectar</button>
+<p id="status">Aguardando conexão</p>
+<small>Use o mesmo código nos dois celulares. Esta versão é de teste.</small>
+</section>
+
+<div id="familiar">
+<section>
+<h2>➕ Cadastrar medicamento</h2>
+<label>Nome do medicamento</label>
+<input id="nome" placeholder="Ex: Losartana">
+<label>Horário</label>
+<input type="time" id="hora">
+<label>Cor do comprimido</label>
+<select id="cor">
+<option>Branco</option>
+<option>Azul</option>
+<option>Amarelo</option>
+<option>Vermelho</option>
+<option>Verde</option>
+<option>Rosa</option>
+<option>Outra</option>
+</select>
+<label>Dosagem</label>
+<input id="dose" placeholder="Ex: 1 comprimido">
+<button class="primary" onclick="cadastrar()">Salvar medicamento</button>
+</section>
+<section>
+<h2>Medicamentos cadastrados</h2>
+<div id="lista"></div>
+</section>
+</div>
+
+<div id="idoso" class="hidden">
+<section>
+<h2>💊 Hora dos medicamentos</h2>
+<button class="primary" onclick="ativarSom()">🔊 Ativar som</button>
+<p><small>Os avisos funcionam somente enquanto esta página estiver aberta. Não substituem o alarme do celular.</small></p>
+<div id="lembretes"></div>
+</section>
+</div>
+
+<div id="historico" class="hidden">
+<section>
+<h2>📋 Histórico</h2>
+<div id="registros"></div>
+</section>
+</div>
+</main>
+
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import {getAuth,signInAnonymously,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import {getFirestore,collection,doc,setDoc,deleteDoc,onSnapshot,addDoc} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+const firebaseConfig={
+apiKey:"AIzaSyAMYY2ePUMyikwEHgI3kSpXApz76F049fo",
+authDomain:"meusremedios.firebaseapp.com",
+projectId:"meusremedios",
+storageBucket:"meusremedios.firebasestorage.app",
+messagingSenderId:"211187679046",
+appId:"1:211187679046:web:3fe5ded8cad692ad44af47",
+measurementId:"G-HTG9CTVYBV"
+};
+
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getFirestore(app);
+const $=id=>document.getElementById(id);
+
+let usuario=null;
+let codigo=localStorage.getItem("codigoFamilia")||"";
+let medicamentos=[];
+let historico=[];
+let cancelar=[];
+let somAtivo=false;
+let audioCtx;
+let avisados=new Set();
+
+$("codigo").value=codigo;
+
+function escapar(v){
+return String(v??"").replace(/[&<>"']/g,c=>({
+"&":"&amp;","<":"&lt;",">":"&gt;",
+'"':"&quot;","'":"&#39;"
+}[c]));
+}
+
+window.aba=function(t){
+["familiar","idoso","historico"].forEach(x=>{
+$(x).classList.toggle("hidden",x!==t);
+$("b"+x).classList.toggle("active",x===t);
+});
+};
+
+function limparEscutas(){
+cancelar.forEach(fn=>fn());
+cancelar=[];
+}
+
+function carregar(){
+limparEscutas();
+medicamentos=[];
+historico=[];
+renderizar();
+if(!usuario||!codigo)return;
+$("status").textContent="Conectando...";
+const base=collection(db,"familias",codigo,"medicamentos");
+const hist=collection(db,"familias",codigo,"historico");
+
+cancelar.push(onSnapshot(base,s=>{
+medicamentos=s.docs.map(d=>({id:d.id,...d.data()}));
+renderizar();
+$("status").textContent="✅ Conectado";
+},e=>{
+$("status").textContent="Erro: "+e.message;
+}));
+
+cancelar.push(onSnapshot(hist,s=>{
+historico=s.docs.map(d=>({id:d.id,...d.data()}));
+renderizar();
+},e=>{
+$("status").textContent="Erro no histórico: "+e.message;
+}));
+}
+
+window.conectar=function(){
+const valor=$("codigo").value.trim();
+if(!/^[a-zA-Z0-9_-]{6,40}$/.test(valor)){
+alert("Use um código de 6 a 40 letras ou números, sem espaços.");
+return;
+}
+codigo=valor;
+localStorage.setItem("codigoFamilia",codigo);
+carregar();
+};
+
+onAuthStateChanged(auth,u=>{
+usuario=u;
+if(u&&codigo)carregar();
+});
+
+signInAnonymously(auth).catch(e=>{
+$("status").textContent="Falha na autenticação: "+e.message;
+});
+
+window.cadastrar=async function(){
+const nome=$("nome").value.trim();
+const hora=$("hora").value;
+const cor=$("cor").value;
+const dose=$("dose").value.trim();
+
+if(!nome||!hora||!dose||!codigo||!usuario){
+alert("Preencha os dados e conecte a família.");
+return;
+}
+try{
+const id=crypto.randomUUID();
+await setDoc(doc(db,"familias",codigo,"medicamentos",id),{
+nome,hora,cor,dose,criadoEm:Date.now()
+});
+$("nome").value="";
+$("hora").value="";
+$("dose").value="";
+alert("Medicamento cadastrado!");
+}catch(e){
+alert("Erro ao salvar: "+e.message);
+}
+};
+
+window.excluir=async function(id){
+if(!confirm("Excluir este medicamento?"))return;
+try{
+await deleteDoc(doc(db,"familias",codigo,"medicamentos",id));
+}catch(e){alert(e.message)}
+};
+
+window.tomou=async function(id){
+const m=medicamentos.find(x=>x.id===id);
+if(!m)return;
+try{
+await addDoc(collection(db,"familias",codigo,"historico"),{
+nome:m.nome,
+hora:m.hora,
+data:new Date().toLocaleString("pt-BR"),
+criadoEm:Date.now(),
+status:"Tomado"
+});
+alert("Medicamento registrado como tomado!");
+}catch(e){alert(e.message)}
+};
+
+function renderizar(){
+const ordenados=[...medicamentos].sort((a,b)=>
+String(a.hora||"").localeCompare(String(b.hora||""))
+);
+
+$("lista").innerHTML=ordenados.map(m=>`
+<div class="item">
+<strong>${escapar(m.nome)}</strong>
+<p>⏰ ${escapar(m.hora)} — ${escapar(m.dose)}</p>
+<p>🎨 ${escapar(m.cor)}</p>
+<button class="danger" data-excluir="${escapar(m.id)}">Excluir</button>
+</div>`).join("")||"Nenhum medicamento cadastrado.";
+
+$("lembretes").innerHTML=ordenados.map(m=>`
+<div class="item big">
+💊 <strong>${escapar(m.nome)}</strong>
+<p>⏰ ${escapar(m.hora)}</p>
+<p>${escapar(m.dose)} — ${escapar(m.cor)}</p>
+<button class="primary" data-tomou="${escapar(m.id)}">✅ Já tomei</button>
+</div>`).join("")||"Nenhum medicamento cadastrado.";
+
+$("registros").innerHTML=[...historico]
+.sort((a,b)=>(b.criadoEm||0)-(a.criadoEm||0))
+.map(h=>`<div class="item">✅ ${escapar(h.nome)}
+<p>${escapar(h.data)} — ${escapar(h.status)}</p></div>`)
+.join("")||"Nenhum registro ainda.";
+}
+
+document.addEventListener("click",e=>{
+const ex=e.target.closest("[data-excluir]");
+const to=e.target.closest("[data-tomou]");
+if(ex)window.excluir(ex.dataset.excluir);
+if(to)window.tomou(to.dataset.tomou);
+});
+
+window.ativarSom=async function(){
+try{
+const AC=window.AudioContext||window.webkitAudioContext;
+if(!AC)throw new Error("Áudio não suportado");
+audioCtx=audioCtx||new AC();
+await audioCtx.resume();
+somAtivo=true;
+alert("Som ativado enquanto o aplicativo estiver aberto.");
+}catch(e){
+alert("Não foi possível ativar o som: "+e.message);
+}
+};
+
+function tocar(){
+if(!somAtivo||!audioCtx)return;
+try{
+const osc=audioCtx.createOscillator();
+const ganho=audioCtx.createGain();
+osc.type="sine";
+osc.frequency.value=880;
+ganho.gain.setValueAtTime(0.15,audioCtx.currentTime);
+ganho.gain.exponentialRampToValueAtTime(
+0.001,audioCtx.currentTime+0.6
+);
+osc.connect(ganho);
+ganho.connect(audioCtx.destination);
+osc.start();
+osc.stop(audioCtx.currentTime+0.6);
+}catch(e){console.error(e)}
+}
+
+function verificarHorarios(){
+const agora=new Date();
+const hora=String(agora.getHours()).padStart(2,"0")+":"+
+String(agora.getMinutes()).padStart(2,"0");
+const dia=agora.getFullYear()+"-"+
+String(agora.getMonth()+1).padStart(2,"0")+"-"+
+String(agora.getDate()).padStart(2,"0");
+
+for(const m of medicamentos){
+if(m.hora!==hora)continue;
+const chave=dia+"-"+codigo+"-"+m.id;
+if(avisados.has(chave))continue;
+avisados.add(chave);
+tocar();
+alert("💊 Hora do remédio!\n"+
+m.nome+"\n"+
+m.dose+"\nCor: "+m.cor);
+}
+}
+
+setInterval(verificarHorarios,15000);
+renderizar();
 </script>
-</body></html>
+</body>
+</html>
