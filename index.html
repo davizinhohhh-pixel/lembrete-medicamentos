@@ -1,30 +1,29 @@
 
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#176b65">
 <title>Meu Remédio</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:#f2f7f5;color:#193b36}
-header{background:#176b65;color:white;padding:22px;text-align:center}
-h1{margin:0}
-main{max-width:650px;margin:auto;padding:15px}
-nav{display:flex;gap:7px;margin-bottom:15px}
-button{cursor:pointer;border:0;border-radius:9px;padding:13px;font-size:16px}
-nav button{flex:1;background:#dcebe7}
-nav button.active{background:#176b65;color:white}
-section{background:white;border-radius:13px;padding:18px;margin-bottom:15px}
-input,select{width:100%;padding:13px;margin:7px 0 14px;border:1px solid #bbb;border-radius:8px;font-size:17px}
-label{font-weight:bold}
-.primary{background:#176b65;color:white;width:100%}
+body{margin:0;font:17px Arial;background:#f2f7f5;color:#193b36}
+header{background:#176b65;color:white;text-align:center;padding:20px}
+main{max-width:650px;margin:auto;padding:14px}
+nav{display:flex;gap:6px}
+nav button{flex:1;font-size:14px}
+section{background:white;border-radius:13px;padding:16px;margin:12px 0}
+button{border:0;border-radius:9px;padding:12px;cursor:pointer}
+input,select{width:100%;padding:12px;margin:7px 0 13px;border:1px solid #bbb;border-radius:8px;font-size:16px}
+.primary{background:#176b65;color:white}
 .danger{background:#b83d3d;color:white}
-.item{border:1px solid #ddd;padding:13px;border-radius:9px;margin:10px 0}
+.wide{width:100%}
+.item{border:1px solid #ddd;padding:12px;border-radius:9px;margin:10px 0}
 .hidden{display:none}
-.big{font-size:22px}
-small{color:#666}
+small{color:#555}
+img.remedio{width:95px;height:95px;object-fit:contain;border-radius:8px}
+#aviso{background:#fff0c2;padding:12px;border-radius:8px}
 </style>
 </head>
 <body>
@@ -34,25 +33,28 @@ small{color:#666}
 </header>
 <main>
 <nav>
-<button onclick="aba('familiar')" id="bfamiliar" class="active">👨‍👩‍👧 Familiar</button>
-<button onclick="aba('idoso')" id="bidoso">💊 Idoso</button>
-<button onclick="aba('historico')" id="bhistorico">📋 Histórico</button>
+<button onclick="aba('familiar')">👪 Familiar</button>
+<button onclick="aba('idoso')">💊 Idoso</button>
+<button onclick="aba('historico')">📋 Histórico</button>
 </nav>
-
 <section>
 <h3>🔗 Conexão familiar</h3>
 <label>Código da família</label>
-<input id="codigo" placeholder="Ex: familia123">
+<input id="codigo" placeholder="Mínimo 12 caracteres">
 <button class="primary" onclick="conectar()">Conectar</button>
+<button onclick="criarFamilia()">Criar código</button>
+<button class="primary" onclick="gerarConvite()">📲 Enviar pelo WhatsApp</button>
+<button onclick="copiarConvite()">📋 Copiar convite</button>
 <p id="status">Aguardando conexão</p>
-<small>Use o mesmo código nos dois celulares. Esta versão é de teste.</small>
+<small>Use o convite no outro celular. O código dá acesso aos dados da família: compartilhe apenas com pessoas de confiança. A sincronização depende do Firebase e das regras de acesso configuradas.</small>
 </section>
-
 <div id="familiar">
 <section>
 <h2>➕ Cadastrar medicamento</h2>
+<label>Nome do idoso</label>
+<input id="idosoNome" placeholder="Nome do idoso">
 <label>Nome do medicamento</label>
-<input id="nome" placeholder="Ex: Losartana">
+<input id="nome" placeholder="Ex.: Losartana">
 <label>Horário</label>
 <input type="time" id="hora">
 <label>Cor do comprimido</label>
@@ -66,24 +68,26 @@ small{color:#666}
 <option>Outra</option>
 </select>
 <label>Dosagem</label>
-<input id="dose" placeholder="Ex: 1 comprimido">
-<button class="primary" onclick="cadastrar()">Salvar medicamento</button>
+<input id="dose" placeholder="Ex.: 1 comprimido">
+<label>Foto do medicamento (opcional)</label>
+<input type="file" id="foto" accept="image/*">
+<small>A foto será reduzida antes de salvar. Imagens muito grandes podem não ser aceitas pelo banco.</small>
+<p><button class="primary wide" onclick="cadastrar()">Salvar medicamento</button></p>
 </section>
 <section>
 <h2>Medicamentos cadastrados</h2>
 <div id="lista"></div>
 </section>
 </div>
-
 <div id="idoso" class="hidden">
 <section>
 <h2>💊 Hora dos medicamentos</h2>
-<button class="primary" onclick="ativarSom()">🔊 Ativar som</button>
-<p><small>Os avisos funcionam somente enquanto esta página estiver aberta. Não substituem o alarme do celular.</small></p>
+<button class="primary wide" onclick="ativarSom()">🔊 Ativar som e voz</button>
+<p><small>Som e voz precisam ser ativados por toque. Alertas não são garantidos com o app fechado ou o celular bloqueado. Mantenha também o alarme do celular.</small></p>
+<div id="aviso" class="hidden"></div>
 <div id="lembretes"></div>
 </section>
 </div>
-
 <div id="historico" class="hidden">
 <section>
 <h2>📋 Histórico</h2>
@@ -91,236 +95,190 @@ small{color:#666}
 </section>
 </div>
 </main>
-
 <script type="module">
-import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-import {getAuth,signInAnonymously,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-import {getFirestore,collection,doc,setDoc,deleteDoc,onSnapshot,addDoc} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js';
+import {getAuth,signInAnonymously,onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js';
+import {getFirestore,collection,doc,setDoc,deleteDoc,onSnapshot,addDoc} from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js';
 
 const firebaseConfig={
-apiKey:"AIzaSyAMYY2ePUMyikwEHgI3kSpXApz76F049fo",
-authDomain:"meusremedios.firebaseapp.com",
-projectId:"meusremedios",
-storageBucket:"meusremedios.firebasestorage.app",
-messagingSenderId:"211187679046",
-appId:"1:211187679046:web:3fe5ded8cad692ad44af47",
-measurementId:"G-HTG9CTVYBV"
+apiKey:'AIzaSyAMYY2ePUMyikwEHgI3kSpXApz76F049fo',
+authDomain:'meusremedios.firebaseapp.com',
+projectId:'meusremedios',
+storageBucket:'meusremedios.firebasestorage.app',
+messagingSenderId:'211187679046',
+appId:'1:211187679046:web:3fe5ded8cad692ad44af47',
+measurementId:'G-HTG9CTVYBV'
 };
-
-const app=initializeApp(firebaseConfig);
-const auth=getAuth(app);
-const db=getFirestore(app);
-const $=id=>document.getElementById(id);
-
-let usuario=null;
-let codigo=localStorage.getItem("codigoFamilia")||"";
-let medicamentos=[];
-let historico=[];
-let cancelar=[];
-let somAtivo=false;
-let audioCtx;
-let avisados=new Set();
-
-$("codigo").value=codigo;
+const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),$=id=>document.getElementById(id);
+let usuario=null,codigo=localStorage.getItem('codigoFamilia')||'',medicamentos=[],historico=[],cancelar=[],somAtivo=false,audioCtx;
+const avisados=new Set();
+$('codigo').value=codigo;
 
 function escapar(v){
-return String(v??"").replace(/[&<>"']/g,c=>({
-"&":"&amp;","<":"&lt;",">":"&gt;",
-'"':"&quot;","'":"&#39;"
-}[c]));
+return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
-
-window.aba=function(t){
-["familiar","idoso","historico"].forEach(x=>{
-$(x).classList.toggle("hidden",x!==t);
-$("b"+x).classList.toggle("active",x===t);
-});
+window.aba=t=>{
+['familiar','idoso','historico'].forEach(x=>$(x).classList.toggle('hidden',x!==t));
 };
-
 function limparEscutas(){
-cancelar.forEach(fn=>fn());
-cancelar=[];
+cancelar.forEach(fn=>fn());cancelar=[];
 }
-
 function carregar(){
-limparEscutas();
-medicamentos=[];
-historico=[];
-renderizar();
+limparEscutas();medicamentos=[];historico=[];renderizar();
 if(!usuario||!codigo)return;
-$("status").textContent="Conectando...";
-const base=collection(db,"familias",codigo,"medicamentos");
-const hist=collection(db,"familias",codigo,"historico");
-
+$('status').textContent='Conectando...';
+const base=collection(db,'familias',codigo,'medicamentos'),hist=collection(db,'familias',codigo,'historico');
 cancelar.push(onSnapshot(base,s=>{
 medicamentos=s.docs.map(d=>({id:d.id,...d.data()}));
 renderizar();
-$("status").textContent="✅ Conectado";
-},e=>{
-$("status").textContent="Erro: "+e.message;
-}));
-
+$('status').textContent='✅ Conectado ao banco de dados';
+},e=>$('status').textContent='Erro de conexão: '+e.message));
 cancelar.push(onSnapshot(hist,s=>{
-historico=s.docs.map(d=>({id:d.id,...d.data()}));
-renderizar();
-},e=>{
-$("status").textContent="Erro no histórico: "+e.message;
-}));
+historico=s.docs.map(d=>({id:d.id,...d.data()}));renderizar();
+},e=>$('status').textContent='Erro no histórico: '+e.message));
 }
-
-window.conectar=function(){
-const valor=$("codigo").value.trim();
-if(!/^[a-zA-Z0-9_-]{6,40}$/.test(valor)){
-alert("Use um código de 6 a 40 letras ou números, sem espaços.");
-return;
+window.conectar=()=>{
+const v=$('codigo').value.trim();
+if(!/^[a-zA-Z0-9_-]{12,80}$/.test(v)){
+alert('Use um código de 12 a 80 letras, números, hífen ou sublinhado.');return;
 }
-codigo=valor;
-localStorage.setItem("codigoFamilia",codigo);
-carregar();
+codigo=v;localStorage.setItem('codigoFamilia',codigo);carregar();
 };
+window.criarFamilia=()=>{
+const bytes=crypto.getRandomValues(new Uint8Array(24));
+$('codigo').value=Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('');
+window.conectar();
+};
+function linkConvite(){
+if(!codigo){alert('Primeiro toque em Criar código ou Conectar.');return null;}
+const url=new URL('https://davizinhohhh-pixel.github.io/lembrete-medicamentos/');
+url.searchParams.set('familia',codigo);
+url.searchParams.set('tela','idoso');
+return url.toString();
+}
+window.copiarConvite=async()=>{
+const link=linkConvite();if(!link)return;
+try{
+await navigator.clipboard.writeText(link);
+alert('Link copiado! Cole no WhatsApp.');
+}catch{prompt('Copie este link:',link);}
+};
+window.gerarConvite=()=>{
+const link=linkConvite();if(!link)return;
+const mensagem='💊 Convite Meu Remédio: toque no link para conectar o celular do idoso aos medicamentos da família: '+link;
+const wa='https://wa.me/?text='+encodeURIComponent(mensagem);
+window.location.href=wa;
+};
+const parametros=new URL(location.href).searchParams;
+const recebido=parametros.get('familia');
+const telaConvite=parametros.get('tela');
+if(recebido&&/^[a-zA-Z0-9_-]{12,80}$/.test(recebido)){
+$('codigo').value=recebido;codigo=recebido;
+localStorage.setItem('codigoFamilia',codigo);
+history.replaceState(null,'',location.pathname);
+if(telaConvite==='idoso')window.aba('idoso');
+}
+onAuthStateChanged(auth,u=>{usuario=u;if(u&&codigo)carregar();});
+signInAnonymously(auth).catch(e=>$('status').textContent='Falha na autenticação: '+e.message);
 
-onAuthStateChanged(auth,u=>{
-usuario=u;
-if(u&&codigo)carregar();
-});
-
-signInAnonymously(auth).catch(e=>{
-$("status").textContent="Falha na autenticação: "+e.message;
-});
-
-window.cadastrar=async function(){
-const nome=$("nome").value.trim();
-const hora=$("hora").value;
-const cor=$("cor").value;
-const dose=$("dose").value.trim();
-
-if(!nome||!hora||!dose||!codigo||!usuario){
-alert("Preencha os dados e conecte a família.");
-return;
+async function reduzirFoto(file){
+if(!file)return '';
+if(!file.type.startsWith('image/'))throw Error('Selecione uma imagem.');
+const bitmap=await createImageBitmap(file);
+const escala=Math.min(1,500/Math.max(bitmap.width,bitmap.height));
+const canvas=document.createElement('canvas');
+canvas.width=Math.round(bitmap.width*escala);
+canvas.height=Math.round(bitmap.height*escala);
+canvas.getContext('2d').drawImage(bitmap,0,0,canvas.width,canvas.height);
+bitmap.close();
+const data=canvas.toDataURL('image/jpeg',.65);
+if(data.length>450000)throw Error('Foto muito grande. Escolha outra.');
+return data;
+}
+window.cadastrar=async()=>{
+const nome=$('nome').value.trim(),hora=$('hora').value,cor=$('cor').value,dose=$('dose').value.trim(),idosoNome=$('idosoNome').value.trim();
+if(!nome||!hora||!dose||!idosoNome||!codigo||!usuario){
+alert('Preencha nome do idoso, medicamento, horário e dosagem e conecte a família.');return;
 }
 try{
-const id=crypto.randomUUID();
-await setDoc(doc(db,"familias",codigo,"medicamentos",id),{
-nome,hora,cor,dose,criadoEm:Date.now()
-});
-$("nome").value="";
-$("hora").value="";
-$("dose").value="";
-alert("Medicamento cadastrado!");
-}catch(e){
-alert("Erro ao salvar: "+e.message);
-}
+const foto=await reduzirFoto($('foto').files[0]);
+await setDoc(doc(db,'familias',codigo,'medicamentos',crypto.randomUUID()),{nome,hora,cor,dose,idosoNome,foto,criadoEm:Date.now()});
+$('nome').value='';$('hora').value='';$('dose').value='';$('foto').value='';
+alert('Medicamento cadastrado!');
+}catch(e){alert('Erro ao salvar: '+e.message);}
 };
-
-window.excluir=async function(id){
-if(!confirm("Excluir este medicamento?"))return;
+window.excluir=async id=>{
+if(!confirm('Excluir este medicamento?'))return;
+try{await deleteDoc(doc(db,'familias',codigo,'medicamentos',id));}
+catch(e){alert(e.message);}
+};
+window.tomou=async id=>{
+const m=medicamentos.find(x=>x.id===id);if(!m)return;
 try{
-await deleteDoc(doc(db,"familias",codigo,"medicamentos",id));
-}catch(e){alert(e.message)}
-};
-
-window.tomou=async function(id){
-const m=medicamentos.find(x=>x.id===id);
-if(!m)return;
-try{
-await addDoc(collection(db,"familias",codigo,"historico"),{
-nome:m.nome,
-hora:m.hora,
-data:new Date().toLocaleString("pt-BR"),
-criadoEm:Date.now(),
-status:"Tomado"
+await addDoc(collection(db,'familias',codigo,'historico'),{
+nome:m.nome,idosoNome:m.idosoNome||'',hora:m.hora,
+data:new Date().toLocaleString('pt-BR'),criadoEm:Date.now(),status:'Tomado'
 });
-alert("Medicamento registrado como tomado!");
-}catch(e){alert(e.message)}
+alert('Medicamento registrado como tomado!');
+}catch(e){alert(e.message);}
 };
-
 function renderizar(){
-const ordenados=[...medicamentos].sort((a,b)=>
-String(a.hora||"").localeCompare(String(b.hora||""))
-);
-
-$("lista").innerHTML=ordenados.map(m=>`
-<div class="item">
-<strong>${escapar(m.nome)}</strong>
-<p>⏰ ${escapar(m.hora)} — ${escapar(m.dose)}</p>
-<p>🎨 ${escapar(m.cor)}</p>
-<button class="danger" data-excluir="${escapar(m.id)}">Excluir</button>
-</div>`).join("")||"Nenhum medicamento cadastrado.";
-
-$("lembretes").innerHTML=ordenados.map(m=>`
-<div class="item big">
-💊 <strong>${escapar(m.nome)}</strong>
-<p>⏰ ${escapar(m.hora)}</p>
-<p>${escapar(m.dose)} — ${escapar(m.cor)}</p>
-<button class="primary" data-tomou="${escapar(m.id)}">✅ Já tomei</button>
-</div>`).join("")||"Nenhum medicamento cadastrado.";
-
-$("registros").innerHTML=[...historico]
-.sort((a,b)=>(b.criadoEm||0)-(a.criadoEm||0))
-.map(h=>`<div class="item">✅ ${escapar(h.nome)}
-<p>${escapar(h.data)} — ${escapar(h.status)}</p></div>`)
-.join("")||"Nenhum registro ainda.";
+const ord=[...medicamentos].sort((a,b)=>String(a.hora||'').localeCompare(String(b.hora||'')));
+const foto=m=>m.foto&&/^data:image\/jpeg;base64,/.test(m.foto)?`<img class="remedio" alt="Foto do medicamento" src="${m.foto}">`:'';
+$('lista').innerHTML=ord.map(m=>`<div class="item">${foto(m)}<strong>${escapar(m.nome)}</strong><p>👤 ${escapar(m.idosoNome||'')}</p><p>⏰ ${escapar(m.hora)} — ${escapar(m.dose)}</p><p>🎨 ${escapar(m.cor)}</p><button class="danger" data-excluir="${escapar(m.id)}">Excluir</button></div>`).join('')||'Nenhum medicamento cadastrado.';
+$('lembretes').innerHTML=ord.map(m=>`<div class="item">${foto(m)}<h3>💊 ${escapar(m.nome)}</h3><p>👤 ${escapar(m.idosoNome||'')}</p><p>⏰ ${escapar(m.hora)}</p><p>${escapar(m.dose)} — ${escapar(m.cor)}</p><button class="primary" data-tomou="${escapar(m.id)}">✅ Já tomei</button></div>`).join('')||'Nenhum medicamento cadastrado.';
+$('registros').innerHTML=[...historico].sort((a,b)=>(b.criadoEm||0)-(a.criadoEm||0)).map(h=>`<div class="item">✅ ${escapar(h.nome)}<p>${escapar(h.idosoNome||'')} — ${escapar(h.data)} — ${escapar(h.status)}</p></div>`).join('')||'Nenhum registro ainda.';
 }
-
-document.addEventListener("click",e=>{
-const ex=e.target.closest("[data-excluir]");
-const to=e.target.closest("[data-tomou]");
+document.addEventListener('click',e=>{
+const ex=e.target.closest('[data-excluir]'),to=e.target.closest('[data-tomou]');
 if(ex)window.excluir(ex.dataset.excluir);
 if(to)window.tomou(to.dataset.tomou);
 });
-
-window.ativarSom=async function(){
+window.ativarSom=async()=>{
 try{
 const AC=window.AudioContext||window.webkitAudioContext;
-if(!AC)throw new Error("Áudio não suportado");
+if(!AC)throw Error('Áudio não suportado');
 audioCtx=audioCtx||new AC();
 await audioCtx.resume();
 somAtivo=true;
-alert("Som ativado enquanto o aplicativo estiver aberto.");
-}catch(e){
-alert("Não foi possível ativar o som: "+e.message);
-}
+alert('Som e voz ativados enquanto o aplicativo estiver aberto.');
+}catch(e){alert('Não foi possível ativar o som: '+e.message);}
 };
-
 function tocar(){
 if(!somAtivo||!audioCtx)return;
 try{
-const osc=audioCtx.createOscillator();
-const ganho=audioCtx.createGain();
-osc.type="sine";
+const osc=audioCtx.createOscillator(),ganho=audioCtx.createGain();
 osc.frequency.value=880;
-ganho.gain.setValueAtTime(0.15,audioCtx.currentTime);
-ganho.gain.exponentialRampToValueAtTime(
-0.001,audioCtx.currentTime+0.6
-);
-osc.connect(ganho);
-ganho.connect(audioCtx.destination);
-osc.start();
-osc.stop(audioCtx.currentTime+0.6);
-}catch(e){console.error(e)}
+ganho.gain.setValueAtTime(.15,audioCtx.currentTime);
+ganho.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+.6);
+osc.connect(ganho);ganho.connect(audioCtx.destination);
+osc.start();osc.stop(audioCtx.currentTime+.6);
+}catch(e){console.error(e);}
 }
-
 function verificarHorarios(){
-const agora=new Date();
-const hora=String(agora.getHours()).padStart(2,"0")+":"+
-String(agora.getMinutes()).padStart(2,"0");
-const dia=agora.getFullYear()+"-"+
-String(agora.getMonth()+1).padStart(2,"0")+"-"+
-String(agora.getDate()).padStart(2,"0");
-
+const agora=new Date(),hora=String(agora.getHours()).padStart(2,'0')+':'+String(agora.getMinutes()).padStart(2,'0'),dia=agora.getFullYear()+'-'+String(agora.getMonth()+1).padStart(2,'0')+'-'+String(agora.getDate()).padStart(2,'0');
 for(const m of medicamentos){
 if(m.hora!==hora)continue;
-const chave=dia+"-"+codigo+"-"+m.id;
-if(avisados.has(chave))continue;
+const chave=dia+'-'+codigo+'-'+m.id;
+if(avisados.has(chave)||localStorage.getItem('alerta-'+chave))continue;
 avisados.add(chave);
-tocar();
-alert("💊 Hora do remédio!\n"+
-m.nome+"\n"+
-m.dose+"\nCor: "+m.cor);
+localStorage.setItem('alerta-'+chave,'1');
+const msg='Hora do remédio. '+m.nome+'. '+m.dose+'. Cor: '+m.cor;
+tocar();setTimeout(tocar,900);setTimeout(tocar,1800);
+$('aviso').textContent='💊 '+msg;
+$('aviso').classList.remove('hidden');
+if(somAtivo&&'speechSynthesis'in window){
+const fala=new SpeechSynthesisUtterance(msg);
+fala.lang='pt-BR';speechSynthesis.speak(fala);
+}
+if(document.visibilityState==='visible'){
+document.title='💊 HORA DO REMÉDIO';
+setTimeout(()=>document.title='Meu Remédio',10000);
 }
 }
-
+}
 setInterval(verificarHorarios,15000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)verificarHorarios();});
 renderizar();
 </script>
 </body>
