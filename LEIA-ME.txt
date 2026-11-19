@@ -1,0 +1,14 @@
+Meu Remédio - estrutura Android inicial
+
+Esta estrutura gera um APK Android usando GitHub Actions.
+A Activity Android abre a versão web publicada no GitHub Pages.
+O arquivo app/src/main/assets/index.html é uma cópia de referência do HTML recebido e não é alterado.
+
+IMPORTANTE:
+- O APK precisa de internet para carregar o app publicado.
+- Dados e sincronização continuam dependendo do Firebase configurado no site.
+- O APK não resolve ainda alarmes em segundo plano, notificações com tela apagada ou restrições de bateria.
+- Links de convite do WhatsApp continuam abrindo o navegador por enquanto; integração nativa de deep links fica para a próxima etapa.
+- Não substitua o index.html existente no repositório por outro arquivo.
+- Para compilar, copie a estrutura do projeto para a raiz do repositório e execute Actions > Gerar APK Android > Run workflow.
+- A versão debug é apenas para testes, não para publicação na Play Store.
